@@ -197,4 +197,114 @@ class Ben10RemasteredApp:
 
         target_img = self._load_pil_art(target_path)
         if target_img is None:
-          
+            self.art_canvas.delete("all")
+            self.art_canvas.create_text(self.ART_W // 2, self.ART_H // 2, text="BEN 10\nREMASTERED PC", fill="#39FF14", font=("Arial", 14, "bold"), justify="center")
+            return
+
+        if self._fade_job:
+            self.root.after_cancel(self._fade_job)
+            self._fade_job = None
+
+        if instant or self.current_pil is None:
+            self.current_pil = target_img
+            self.tk_photo = ImageTk.PhotoImage(target_img)
+            self.art_canvas.delete("all")
+            self.art_canvas.create_image(0, 0, anchor="nw", image=self.tk_photo)
+        else:
+            start_img = self.current_pil
+            self._animate_fade(start_img, target_img, step=1, total_steps=8)
+
+    def _animate_fade(self, img1, img2, step, total_steps):
+        alpha = step / float(total_steps)
+        blended = Image.blend(img1, img2, alpha)
+        self.tk_photo = ImageTk.PhotoImage(blended)
+        self.art_canvas.delete("all")
+        self.art_canvas.create_image(0, 0, anchor="nw", image=self.tk_photo)
+        if step < total_steps:
+            self._fade_job = self.root.after(28, lambda: self._animate_fade(img1, img2, step + 1, total_steps))
+        else:
+            self.current_pil = img2
+            self._fade_job = None
+
+    def _on_tab_changed(self, _event):
+        idx = self.nb.index(self.nb.select())
+        self._switch_art_for_tab(idx, instant=False)
+
+    def _pick_custom_art(self):
+        p = filedialog.askopenfilename(filetypes=[("Image Files", "*.png *.jpg *.jpeg *.webp"), ("All", "*.*")])
+        if p:
+            self.cfg["custom_art"] = p
+            ConfigManager.save(self.cfg)
+            self._switch_art_for_tab(self.nb.index(self.nb.select()), instant=False)
+
+    def _reset_custom_art(self):
+        self.cfg["custom_art"] = ""
+        ConfigManager.save(self.cfg)
+        self._switch_art_for_tab(self.nb.index(self.nb.select()), instant=False)
+
+    def _sync_low_pc_state(self):
+        is_low = self.v_lowpc.get()
+        state = "disabled" if is_low else "normal"
+        for rb in self.res_btns:
+            rb.configure(state=state)
+        if is_low:
+            self.v_res.set("1")
+
+    def _on_low_pc_toggle(self):
+        self._sync_low_pc_state()
+        self._save_opts()
+
+    def _rom_txt(self):
+        p = self.cfg.get("game_path", "")
+        return f"Loaded: {os.path.basename(p)}" if p and os.path.exists(p) else "No game data selected (.iso / .cso)"
+
+    def _pick_rom(self):
+        p = filedialog.askopenfilename(filetypes=[("PSP Game Data", "*.iso *.cso"), ("All", "*.*")])
+        if p:
+            self.cfg["game_path"] = p
+            ConfigManager.save(self.cfg)
+            self.lbl_rom.config(text=self._rom_txt())
+
+    def _save_opts(self):
+        self.cfg.update({
+            "control_scheme": self.v_ctrl.get(),
+            "resolution": self.v_res.get(),
+            "fullscreen": self.v_fs.get(),
+            "vsync": self.v_vs.get(),
+            "fps_60": self.v_fps60.get(),
+            "low_end_pc": self.v_lowpc.get()
+        })
+        ConfigManager.save(self.cfg)
+
+    def _play(self):
+        gp = self.cfg.get("game_path", "")
+        if not gp or not os.path.exists(gp):
+            messagebox.showwarning("Missing Game Data", "Please select your game image file (.iso / .cso) first!")
+            return
+
+        self.btn_play.configure(state="disabled", text="LAUNCHING...")
+        self.root.update_idletasks()
+
+        try:
+            ConfigManager.apply_settings(self.cfg)
+            exe = os.path.join(BASE_DIR, "Engine", "Ben10Game.exe")
+            if not sys.platform.startswith("win"):
+                messagebox.showinfo("Test OK", f"Remastered PC Config written!\n60 FPS: {self.cfg['fps_60']}")
+                self.btn_play.configure(state="normal", text="▶  PLAY GAME")
+                return
+            if not os.path.exists(exe):
+                messagebox.showerror("Engine Missing", "Core game files not found inside 'Engine' folder.")
+                self.btn_play.configure(state="normal", text="▶  PLAY GAME")
+                return
+            subprocess.Popen([exe, "--fullscreen", gp])
+            self.root.destroy()
+        except Exception as e:
+            messagebox.showerror("Launch Error", f"Failed to start game:\n{e}")
+            self.btn_play.configure(state="normal", text="▶  PLAY GAME")
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    Ben10RemasteredApp(root)
+    root.mainloop()
+        
