@@ -3,6 +3,7 @@ from tkinter import ttk, filedialog, messagebox
 import os
 import subprocess
 import sys
+import time
 from backend import BASE_DIR, ConfigManager
 
 try:
@@ -18,293 +19,218 @@ def resource_path(rel_path):
     return os.path.join(BASE_DIR, rel_path)
 
 
+LANGS = {
+    "en": {
+        "subtitle": "REMASTERED PC EDITION  |  60 FPS WIDESCREEN",
+        "playtime": "PLAYTIME: {h}h {m}m",
+        "tab_play": "  PLAY  ",
+        "tab_settings": "  SETTINGS  ",
+        "tab_controls": "  CONTROLS  ",
+        "game_data": "GAME DATA FILE (.ISO / .CSO)",
+        "select_file": "SELECT FILE",
+        "no_rom": "No game data selected (.iso / .cso)",
+        "loaded": "Loaded: ",
+        "mods_lbl": "MODS & ADD-ONS:",
+        "install_mod": "+ INSTALL MOD",
+        "clear_mods": "CLEAR MODS",
+        "mod_warn": "⚠ Warning: Adding mods, cheats, or custom content may break the game.\nMake sure your mod is stable, as this uses the PSP version.",
+        "play_btn": "▶  PLAY GAME",
+        "launching": "RUNNING...",
+        "input_prof": "INPUT PROFILE",
+        "kb_mouse": "Keyboard + Mouse (WASD + Click Attacks)",
+        "gamepad": "Xbox / PlayStation Controller (XInput)",
+        "res_lbl": "RENDER RESOLUTION",
+        "native": "Native",
+        "perf_lbl": "PERFORMANCE & DISPLAY",
+        "fps60": "Unlock 60 FPS Mode (Recommended)",
+        "lowpc": "Low-End / Old PC Mode (Native Res & Fast Speed)",
+        "fs": "Fullscreen Mode (16:9 Widescreen)",
+        "vsync": "Enable VSync",
+        "saves_lbl": "SAVE STATES:",
+        "bkp_btn": "BACKUP",
+        "rst_save_btn": "RESTORE",
+        "bkp_ok": "Save states & progress backed up to SaveStates_Backup.zip!",
+        "rst_ok": "Save states restored successfully!",
+        "rst_miss": "No backup file (SaveStates_Backup.zip) found yet.",
+        "art_lbl": "WALLPAPER:",
+        "custom_art": "CUSTOM PHOTO",
+        "reset_art": "RESET",
+        "mod_ok": "Mod installed: ",
+        "clear_ask": "Remove all installed mods and cheats and restore original files?",
+        "clear_ok": "All mods removed!",
+        "miss_rom": "Please select your game image file (.iso / .cso) first!",
+        "keys": [
+            ("W A S D", "Move Character"),
+            ("SPACEBAR", "Jump / Double Jump"),
+            ("LEFT CLICK / J", "Light Attack"),
+            ("RIGHT CLICK / K", "Heavy Attack"),
+            ("LEFT SHIFT / L", "Block / Grab / Interact"),
+            ("1 2 3 4 / ARROWS", "Select Alien Form"),
+            ("Q / E", "Omnitrix / Camera"),
+            ("F5 / F7", "Quick Save State / Load State"),
+            ("ESC / TAB", "Pause / Upgrades Menu")
+        ]
+    },
+    "ru": {
+        "subtitle": "REMASTERED PC EDITION  |  60 FPS ШИРОКИЙ ЭКРАН",
+        "playtime": "В ИГРЕ: {h} ч {m} м",
+        "tab_play": "  ИГРАТЬ  ",
+        "tab_settings": "  НАСТРОЙКИ  ",
+        "tab_controls": "  УПРАВЛЕНИЕ  ",
+        "game_data": "ОБРАЗ ИГРЫ (.ISO / .CSO)",
+        "select_file": "ВЫБРАТЬ ФАЙЛ",
+        "no_rom": "Файл игры не выбран (.iso / .cso)",
+        "loaded": "Выбран: ",
+        "mods_lbl": "МОДЫ И ДОПОЛНЕНИЯ:",
+        "install_mod": "+ ПОСТАВИТЬ МОД",
+        "clear_mods": "УДАЛИТЬ МОДЫ",
+        "mod_warn": "⚠ Внимание: добавление модов, читов и любого контента может сломать игру.\nСледите за тем, чтобы мод был стабильным, так как это PSP-версия.",
+        "play_btn": "▶  ЗАПУСТИТЬ ИГРУ",
+        "launching": "ИГРА ЗАПУЩЕНА...",
+        "input_prof": "УСТРОЙСТВО УПРАВЛЕНИЯ",
+        "kb_mouse": "Клавиатура + Мышь (WASD + Клики атаки)",
+        "gamepad": "Геймпад Xbox / PlayStation (XInput)",
+        "res_lbl": "РАЗРЕШЕНИЕ ГРАФИКИ",
+        "native": "Родное",
+        "perf_lbl": "ПРОИЗВОДИТЕЛЬНОСТЬ И ЭКРАН",
+        "fps60": "Разблокировать 60 FPS (Рекомендуется)",
+        "lowpc": "Режим для слабых ПК (Родное разрешение и скорость)",
+        "fs": "Полноэкранный режим (16:9)",
+        "vsync": "Вертикальная синхронизация (VSync)",
+        "saves_lbl": "СЕЙВ-СТЕЙТЫ:",
+        "bkp_btn": "БЭКАП",
+        "rst_save_btn": "ВОССТАНОВИТЬ",
+        "bkp_ok": "Сейв-стейты и сохранения сохранены в SaveStates_Backup.zip!",
+        "rst_ok": "Сейв-стейты успешно восстановлены!",
+        "rst_miss": "Файл резервной копии (SaveStates_Backup.zip) пока не найден.",
+        "art_lbl": "ФОН:",
+        "custom_art": "СВОЁ ФОТО",
+        "reset_art": "СБРОС",
+        "mod_ok": "Мод установлен: ",
+        "clear_ask": "Удалить все установленные моды и вернуть игру к оригиналу?",
+        "clear_ok": "Все моды удалены!",
+        "miss_rom": "Сначала выберите файл образа игры (.iso / .cso)!",
+        "keys": [
+            ("W A S D", "Движение персонажа"),
+            ("ПРОБЕЛ", "Прыжок / Двойной прыжок"),
+            ("ЛКМ / J", "Лёгкая атака"),
+            ("ПКМ / K", "Сильная атака"),
+            ("LEFT SHIFT / L", "Блок / Захват / Действие"),
+            ("1 2 3 4 / СТРЕЛКИ", "Выбор пришельца"),
+            ("Q / E", "Омнитрикс / Камера"),
+            ("F5 / F7", "Быстрый сейв-стейт / Загрузка"),
+            ("ESC / TAB", "Пауза / Меню улучшений")
+        ]
+    },
+    "de": {
+        "subtitle": "REMASTERED PC EDITION  |  60 FPS BREITBILD",
+        "playtime": "SPIELZEIT: {h}h {m}m",
+        "tab_play": "  SPIELEN  ",
+        "tab_settings": "  EINSTELLUNGEN  ",
+        "tab_controls": "  STEUERUNG  ",
+        "game_data": "SPIELDATEI (.ISO / .CSO)",
+        "select_file": "DATEI WÄHLEN",
+        "no_rom": "Keine Spieldatei gewählt (.iso / .cso)",
+        "loaded": "Geladen: ",
+        "mods_lbl": "MODS & ADD-ONS:",
+        "install_mod": "+ MOD INSTALLIEREN",
+        "clear_mods": "MODS LÖSCHEN",
+        "mod_warn": "⚠ Achtung: Mods, Cheats oder fremde Inhalte können das Spiel beschädigen.\nAchte auf stabile Mods, da dies die PSP-Version ist.",
+        "play_btn": "▶  SPIEL STARTEN",
+        "launching": "LÄUFT...",
+        "input_prof": "STEUERUNGSPROFIL",
+        "kb_mouse": "Tastatur + Maus (WASD + Mausklicks)",
+        "gamepad": "Xbox / PlayStation Controller (XInput)",
+        "res_lbl": "AUFLÖSUNG",
+        "native": "Nativ",
+        "perf_lbl": "LEISTUNG & ANZEIGE",
+        "fps60": "60 FPS Modus freischalten (Empfohlen)",
+        "lowpc": "Schwacher PC Modus (Native Auflösung & Tempo)",
+        "fs": "Vollbildmodus (16:9 Breitbild)",
+        "vsync": "VSync aktivieren",
+        "saves_lbl": "SAVE STATES:",
+        "bkp_btn": "BACKUP",
+        "rst_save_btn": "LADEN",
+        "bkp_ok": "Save States erfolgreich in SaveStates_Backup.zip gesichert!",
+        "rst_ok": "Save States wiederhergestellt!",
+        "rst_miss": "Kein Backup (SaveStates_Backup.zip) gefunden.",
+        "art_lbl": "BILD:",
+        "custom_art": "EIGENES FOTO",
+        "reset_art": "RESET",
+        "mod_ok": "Mod installiert: ",
+        "clear_ask": "Alle installierten Mods entfernen und Originalzustand wiederherstellen?",
+        "clear_ok": "Alle Mods entfernt!",
+        "miss_rom": "Bitte wähle zuerst deine Spieldatei (.iso / .cso) aus!",
+        "keys": [
+            ("W A S D", "Charakter bewegen"),
+            ("LEERTASTE", "Springen / Doppelsprung"),
+            ("LINKSKLICK / J", "Leichter Angriff"),
+            ("RECHTSKLICK / K", "Starker Angriff"),
+            ("LINKS SHIFT / L", "Blocken / Greifen"),
+            ("1 2 3 4 / PFEILE", "Alien auswählen"),
+            ("Q / E", "Omnitrix / Kamera"),
+            ("F5 / F7", "Schnellspeichern / Schnellladen"),
+            ("ESC / TAB", "Pause / Upgrades")
+        ]
+    },
+    "ja": {
+        "subtitle": "REMASTERED PC EDITION  |  60 FPS ワイド画面",
+        "playtime": "プレイ時間: {h}時間 {m}分",
+        "tab_play": "  プレイ  ",
+        "tab_settings": "  設定  ",
+        "tab_controls": "  操作方法  ",
+        "game_data": "ゲームデータ (.ISO / .CSO)",
+        "select_file": "ファイル選択",
+        "no_rom": "ゲームファイル未選択 (.iso / .cso)",
+        "loaded": "選択済み: ",
+        "mods_lbl": "MOD・追加コンテンツ:",
+        "install_mod": "+ MOD導入",
+        "clear_mods": "MOD削除",
+        "mod_warn": "⚠ 注意: MODやチートの導入によりゲームが破損する場合があります。\nPSP版ベースのため、安定したMODを使用してください。",
+        "play_btn": "▶  ゲーム開始",
+        "launching": "起動中...",
+        "input_prof": "操作デバイス",
+        "kb_mouse": "キーボード + マウス (WASD + クリック攻撃)",
+        "gamepad": "Xbox / PlayStation コントローラー (XInput)",
+        "res_lbl": "描画解像度",
+        "native": "標準",
+        "perf_lbl": "パフォーマンスと画面設定",
+        "fps60": "60 FPS モードを有効化 (推奨)",
+        "lowpc": "低スペックPCモード (標準解像度・高速化)",
+        "fs": "フルスクリーンモード (16:9 ワイド)",
+        "vsync": "垂直同期 (VSync)",
+        "saves_lbl": "ステートセーブ:",
+        "bkp_btn": "保存",
+        "rst_save_btn": "復元",
+        "bkp_ok": "ステートセーブを SaveStates_Backup.zip に保存しました！",
+        "rst_ok": "ステートセーブを復元しました！",
+        "rst_miss": "バックアップファイルが見つかりません。",
+        "art_lbl": "背景:",
+        "custom_art": "画像変更",
+        "reset_art": "リセット",
+        "mod_ok": "MODを導入しました: ",
+        "clear_ask": "導入済みのMODをすべて削除して初期状態に戻しますか？",
+        "clear_ok": "すべてのMODを削除しました！",
+        "miss_rom": "先にゲームファイル (.iso / .cso) を選択してください！",
+        "keys": [
+            ("W A S D", "移動"),
+            ("SPACE", "ジャンプ / 二段ジャンプ"),
+            ("左クリック / J", "弱攻撃"),
+            ("右クリック / K", "強攻撃"),
+            ("LEFT SHIFT / L", "ガード / つかむ / 調べる"),
+            ("1 2 3 4 / 矢印キー", "エイリアン変身選択"),
+            ("Q / E", "オムニトリックス / カメラ"),
+            ("F5 / F7", "クイックセーブ / クイックロード"),
+            ("ESC / TAB", "ポーズ / アップグレード")
+        ]
+    }
+}
+
+
 class OmnitrixCanvas(tk.Canvas):
-    def __init__(self, parent, size=62):
+    def __init__(self, parent, size=58):
         super().__init__(parent, width=size, height=size, bg="#0D1117", highlightthickness=0)
         p = 5
         self.create_oval(p, p, size - p, size - p, fill="#161B22", outline="#39FF14", width=3)
         self.create_polygon(p + 10, p + 7, size - p - 10, p + 7, size // 2, size // 2, fill="#39FF14")
-        self.create_polygon(p + 10, size - p - 7, size - p - 10, size - p - 7, size // 2, size // 2, fill="#39FF14")
-
-
-class Ben10RemasteredApp:
-    ART_W = 310
-    ART_H = 484
-
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Ben 10: Protector of Earth — Remastered PC")
-        self.root.configure(bg="#0D1117")
-
-        icon_file = resource_path(os.path.join("assets", "icon.ico"))
-        if os.path.exists(icon_file):
-            try:
-                self.root.iconbitmap(icon_file)
-            except Exception:
-                pass
-
-        if sys.platform.startswith("win"):
-            self.root.geometry("920x520")
-            self.root.resizable(False, False)
-
-        self.cfg = ConfigManager.load()
-        self.current_pil = None
-        self.tk_photo = None
-        self._fade_job = None
-
-        self._build_style()
-        self._build_ui()
-        self._sync_low_pc_state()
-        self._switch_art_for_tab(0, instant=True)
-
-    def _build_style(self):
-        s = ttk.Style()
-        s.theme_use("clam")
-        s.configure("TNotebook", background="#0D1117", borderwidth=0)
-        s.configure("TNotebook.Tab", background="#161B22", foreground="#C9D1D9", padding=(14, 6), font=("Arial", 9, "bold"))
-        s.map("TNotebook.Tab", background=[("selected", "#21262D")], foreground=[("selected", "#39FF14")])
-        s.configure("Dark.TFrame", background="#0D1117")
-        s.configure("Card.TFrame", background="#161B22")
-        s.configure("Dark.TRadiobutton", background="#161B22", foreground="#FFFFFF", font=("Arial", 9))
-        s.configure("Dark.TCheckbutton", background="#161B22", foreground="#FFFFFF", font=("Arial", 9))
-
-    def _build_ui(self):
-        main_wrap = tk.Frame(self.root, bg="#0D1117")
-        main_wrap.pack(fill="both", expand=True, padx=16, pady=16)
-
-        left_col = tk.Frame(main_wrap, bg="#0D1117")
-        left_col.pack(side="left", fill="both", expand=True, padx=(0, 14))
-
-        hdr = tk.Frame(left_col, bg="#0D1117", pady=4)
-        hdr.pack(fill="x", pady=(0, 8))
-        OmnitrixCanvas(hdr, 60).pack(side="left", padx=(0, 12))
-
-        tf = tk.Frame(hdr, bg="#0D1117")
-        tf.pack(side="left", fill="y", pady=4)
-        tk.Label(tf, text="BEN 10: PROTECTOR OF EARTH", font=("Arial", 15, "bold"), bg="#0D1117", fg="#FFFFFF").pack(anchor="w")
-        tk.Label(tf, text="REMASTERED PC EDITION  |  60 FPS WIDESCREEN", font=("Arial", 8, "bold"), bg="#0D1117", fg="#39FF14").pack(anchor="w")
-
-        self.nb = ttk.Notebook(left_col)
-        self.nb.pack(fill="both", expand=True)
-        self.nb.bind("<<NotebookTabChanged>>", self._on_tab_changed)
-
-        t1 = ttk.Frame(self.nb, style="Dark.TFrame")
-        t2 = ttk.Frame(self.nb, style="Dark.TFrame")
-        t3 = ttk.Frame(self.nb, style="Dark.TFrame")
-        self.nb.add(t1, text="  PLAY  ")
-        self.nb.add(t2, text="  SETTINGS  ")
-        self.nb.add(t3, text="  CONTROLS  ")
-
-        # Tab 1: PLAY
-        c1 = ttk.Frame(t1, style="Card.TFrame", padding=16)
-        c1.pack(fill="both", expand=True, pady=(8, 0))
-        tk.Label(c1, text="GAME DATA FILE (.ISO / .CSO)", font=("Arial", 9, "bold"), bg="#161B22", fg="#8B949E").pack(anchor="w")
-
-        rf = tk.Frame(c1, bg="#0D1117", padx=10, pady=8)
-        rf.pack(fill="x", pady=(6, 12))
-        self.lbl_rom = tk.Label(rf, text=self._rom_txt(), font=("Arial", 9), bg="#0D1117", fg="#E6EDF3", wraplength=380, justify="left")
-        self.lbl_rom.pack(side="left", fill="x", expand=True)
-        tk.Button(rf, text="SELECT FILE", font=("Arial", 8, "bold"), bg="#21262D", fg="#39FF14", relief="flat", padx=10, pady=5, command=self._pick_rom).pack(side="right")
-
-        info_text = (
-            "• Native 16:9 Widescreen & 60 FPS unlock ready\n"
-            "• Ultra-lightweight engine for old laptops & modern PCs\n"
-            "• Full Keyboard + Mouse & XInput Gamepad support\n"
-            "• Dynamic art showcase & custom wallpaper support"
-        )
-        tk.Label(c1, text=info_text, font=("Arial", 9), bg="#161B22", fg="#8B949E", justify="left").pack(anchor="w", pady=(0, 12))
-
-        self.btn_play = tk.Button(c1, text="▶  PLAY GAME", font=("Arial", 13, "bold"), bg="#39FF14", fg="#0D1117", relief="flat", pady=11, command=self._play)
-        self.btn_play.pack(side="bottom", fill="x")
-
-        # Tab 2: SETTINGS & CUSTOMIZATION
-        c2 = ttk.Frame(t2, style="Card.TFrame", padding=14)
-        c2.pack(fill="both", expand=True, pady=(8, 0))
-
-        tk.Label(c2, text="INPUT PROFILE", font=("Arial", 8, "bold"), bg="#161B22", fg="#39FF14").pack(anchor="w")
-        self.v_ctrl = tk.StringVar(value=self.cfg["control_scheme"])
-        for txt, val in [("Keyboard + Mouse (WASD + Click Attacks)", "keyboard_mouse"), ("Xbox / PlayStation Controller (XInput)", "gamepad")]:
-            ttk.Radiobutton(c2, text=txt, variable=self.v_ctrl, value=val, style="Dark.TRadiobutton", command=self._save_opts).pack(anchor="w")
-
-        tk.Label(c2, text="RENDER RESOLUTION", font=("Arial", 8, "bold"), bg="#161B22", fg="#39FF14").pack(anchor="w", pady=(8, 1))
-        self.v_res = tk.StringVar(value=str(self.cfg["resolution"]))
-        rf2 = tk.Frame(c2, bg="#161B22")
-        rf2.pack(anchor="w")
-        self.res_btns = []
-        for txt, val in [("Native", "1"), ("720p", "2"), ("1080p", "3"), ("4K", "6")]:
-            rb = ttk.Radiobutton(rf2, text=txt, variable=self.v_res, value=val, style="Dark.TRadiobutton", command=self._save_opts)
-            rb.pack(side="left", padx=(0, 12))
-            self.res_btns.append(rb)
-
-        tk.Label(c2, text="PERFORMANCE & DISPLAY", font=("Arial", 8, "bold"), bg="#161B22", fg="#39FF14").pack(anchor="w", pady=(8, 1))
-        self.v_fps60 = tk.BooleanVar(value=self.cfg.get("fps_60", True))
-        self.v_lowpc = tk.BooleanVar(value=self.cfg.get("low_end_pc", False))
-        self.v_fs = tk.BooleanVar(value=self.cfg.get("fullscreen", True))
-        self.v_vs = tk.BooleanVar(value=self.cfg.get("vsync", False))
-
-        ttk.Checkbutton(c2, text="Unlock 60 FPS Mode (Recommended)", variable=self.v_fps60, style="Dark.TCheckbutton", command=self._save_opts).pack(anchor="w")
-        ttk.Checkbutton(c2, text="Low-End / Old PC Mode (Native Res & Fast Speed)", variable=self.v_lowpc, style="Dark.TCheckbutton", command=self._on_low_pc_toggle).pack(anchor="w")
-        ttk.Checkbutton(c2, text="Fullscreen Mode (16:9 Widescreen)", variable=self.v_fs, style="Dark.TCheckbutton", command=self._save_opts).pack(anchor="w")
-        ttk.Checkbutton(c2, text="Enable VSync", variable=self.v_vs, style="Dark.TCheckbutton", command=self._save_opts).pack(anchor="w")
-
-        art_bar = tk.Frame(c2, bg="#0D1117", padx=8, pady=6)
-        art_bar.pack(fill="x", side="bottom", pady=(6, 0))
-        tk.Label(art_bar, text="LAUNCHER ART:", font=("Arial", 8, "bold"), bg="#0D1117", fg="#8B949E").pack(side="left")
-        tk.Button(art_bar, text="RESET", font=("Arial", 8, "bold"), bg="#21262D", fg="#C9D1D9", relief="flat", padx=8, pady=3, command=self._reset_custom_art).pack(side="right", padx=(6, 0))
-        tk.Button(art_bar, text="CUSTOM PHOTO", font=("Arial", 8, "bold"), bg="#21262D", fg="#39FF14", relief="flat", padx=8, pady=3, command=self._pick_custom_art).pack(side="right")
-
-        # Tab 3: CONTROLS
-        c3 = ttk.Frame(t3, style="Card.TFrame", padding=16)
-        c3.pack(fill="both", expand=True, pady=(8, 0))
-        keys = [
-            ("W A S D", "Move Character"),
-            ("SPACEBAR", "Jump / Double Jump"),
-            ("LEFT CLICK", "Light Attack"),
-            ("RIGHT CLICK", "Heavy Attack"),
-            ("LEFT SHIFT", "Block / Grab / Interact"),
-            ("Q / E", "Transform / Cycle Alien Forms"),
-            ("ESC / TAB", "Pause / Upgrades Menu")
-        ]
-        for k, desc in keys:
-            row = tk.Frame(c3, bg="#161B22")
-            row.pack(fill="x", pady=3)
-            tk.Label(row, text=k, font=("Consolas", 9, "bold"), bg="#0D1117", fg="#39FF14", width=16).pack(side="left", padx=(0, 10))
-            tk.Label(row, text=desc, font=("Arial", 9), bg="#161B22", fg="#C9D1D9").pack(side="left")
-
-        # Right column: Dynamic Art Showcase
-        right_frame = tk.Frame(main_wrap, bg="#39FF14", padx=2, pady=2)
-        right_frame.pack(side="right", fill="y")
-        self.art_canvas = tk.Canvas(right_frame, width=self.ART_W, height=self.ART_H, bg="#161B22", highlightthickness=0)
-        self.art_canvas.pack()
-
-    def _load_pil_art(self, path):
-        if not HAS_PIL or not path or not os.path.exists(path):
-            return None
-        try:
-            img = Image.open(path).convert("RGB")
-            img = img.resize((self.ART_W, self.ART_H), Image.Resampling.LANCZOS)
-            return img
-        except Exception:
-            return None
-
-    def _switch_art_for_tab(self, tab_idx, instant=False):
-        custom = self.cfg.get("custom_art", "")
-        if custom and os.path.exists(custom):
-            target_path = custom
-        else:
-            art_name = "art_play.png" if tab_idx == 0 else "art_settings.png"
-            target_path = resource_path(os.path.join("assets", art_name))
-
-        target_img = self._load_pil_art(target_path)
-        if target_img is None:
-            self.art_canvas.delete("all")
-            self.art_canvas.create_text(self.ART_W // 2, self.ART_H // 2, text="BEN 10\nREMASTERED PC", fill="#39FF14", font=("Arial", 14, "bold"), justify="center")
-            return
-
-        if self._fade_job:
-            self.root.after_cancel(self._fade_job)
-            self._fade_job = None
-
-        if instant or self.current_pil is None:
-            self.current_pil = target_img
-            self.tk_photo = ImageTk.PhotoImage(target_img)
-            self.art_canvas.delete("all")
-            self.art_canvas.create_image(0, 0, anchor="nw", image=self.tk_photo)
-        else:
-            start_img = self.current_pil
-            self._animate_fade(start_img, target_img, step=1, total_steps=8)
-
-    def _animate_fade(self, img1, img2, step, total_steps):
-        alpha = step / float(total_steps)
-        blended = Image.blend(img1, img2, alpha)
-        self.tk_photo = ImageTk.PhotoImage(blended)
-        self.art_canvas.delete("all")
-        self.art_canvas.create_image(0, 0, anchor="nw", image=self.tk_photo)
-        if step < total_steps:
-            self._fade_job = self.root.after(28, lambda: self._animate_fade(img1, img2, step + 1, total_steps))
-        else:
-            self.current_pil = img2
-            self._fade_job = None
-
-    def _on_tab_changed(self, _event):
-        idx = self.nb.index(self.nb.select())
-        self._switch_art_for_tab(idx, instant=False)
-
-    def _pick_custom_art(self):
-        p = filedialog.askopenfilename(filetypes=[("Image Files", "*.png *.jpg *.jpeg *.webp"), ("All", "*.*")])
-        if p:
-            self.cfg["custom_art"] = p
-            ConfigManager.save(self.cfg)
-            self._switch_art_for_tab(self.nb.index(self.nb.select()), instant=False)
-
-    def _reset_custom_art(self):
-        self.cfg["custom_art"] = ""
-        ConfigManager.save(self.cfg)
-        self._switch_art_for_tab(self.nb.index(self.nb.select()), instant=False)
-
-    def _sync_low_pc_state(self):
-        is_low = self.v_lowpc.get()
-        state = "disabled" if is_low else "normal"
-        for rb in self.res_btns:
-            rb.configure(state=state)
-        if is_low:
-            self.v_res.set("1")
-
-    def _on_low_pc_toggle(self):
-        self._sync_low_pc_state()
-        self._save_opts()
-
-    def _rom_txt(self):
-        p = self.cfg.get("game_path", "")
-        return f"Loaded: {os.path.basename(p)}" if p and os.path.exists(p) else "No game data selected (.iso / .cso)"
-
-    def _pick_rom(self):
-        p = filedialog.askopenfilename(filetypes=[("PSP Game Data", "*.iso *.cso"), ("All", "*.*")])
-        if p:
-            self.cfg["game_path"] = p
-            ConfigManager.save(self.cfg)
-            self.lbl_rom.config(text=self._rom_txt())
-
-    def _save_opts(self):
-        self.cfg.update({
-            "control_scheme": self.v_ctrl.get(),
-            "resolution": self.v_res.get(),
-            "fullscreen": self.v_fs.get(),
-            "vsync": self.v_vs.get(),
-            "fps_60": self.v_fps60.get(),
-            "low_end_pc": self.v_lowpc.get()
-        })
-        ConfigManager.save(self.cfg)
-
-    def _play(self):
-        gp = self.cfg.get("game_path", "")
-        if not gp or not os.path.exists(gp):
-            messagebox.showwarning("Missing Game Data", "Please select your game image file (.iso / .cso) first!")
-            return
-
-        self.btn_play.configure(state="disabled", text="LAUNCHING...")
-        self.root.update_idletasks()
-
-        try:
-            ConfigManager.apply_settings(self.cfg)
-            exe = os.path.join(BASE_DIR, "Engine", "Ben10Game.exe")
-            if not sys.platform.startswith("win"):
-                messagebox.showinfo("Test OK", f"Remastered PC Config written!\n60 FPS: {self.cfg['fps_60']}")
-                self.btn_play.configure(state="normal", text="▶  PLAY GAME")
-                return
-            if not os.path.exists(exe):
-                messagebox.showerror("Engine Missing", "Core game files not found inside 'Engine' folder.")
-                self.btn_play.configure(state="normal", text="▶  PLAY GAME")
-                return
-            subprocess.Popen([exe, "--fullscreen", gp])
-            self.root.destroy()
-        except Exception as e:
-            messagebox.showerror("Launch Error", f"Failed to start game:\n{e}")
-            self.btn_play.configure(state="normal", text="▶  PLAY GAME")
-
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    Ben10RemasteredApp(root)
-    root.mainloop()
         
